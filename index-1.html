@@ -1,0 +1,1666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#020912">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Solo Leveling">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.png">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>[ SYSTEM ] — Antonio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #020912;
+  --panel:    rgba(3, 12, 28, 0.95);
+  --border:   #0d2a50;
+  --border2:  #1a4080;
+  --cyan:     #00d4ff;
+  --cyan2:    #00a8cc;
+  --cyan-dim: rgba(0,212,255,0.12);
+  --gold:     #f0c040;
+  --gold-dim: rgba(240,192,64,0.15);
+  --green:    #00ff88;
+  --red:      #ff3355;
+  --blue:     #2255ff;
+  --text:     #b8d8f0;
+  --muted:    #3a6080;
+  --muted2:   #5a80a0;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{width:100%;min-height:100vh;overflow-x:hidden;background:var(--bg);}
+body{font-family:'Rajdhani',sans-serif;color:var(--text);padding-bottom:40px;}
+
+/* ── BACKGROUND ── */
+canvas#bg{position:fixed;inset:0;z-index:0;width:100%;height:100%;}
+.scanlines{position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.04) 2px,rgba(0,0,0,0.04) 4px);}
+.vignette{position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:radial-gradient(ellipse at center,transparent 50%,rgba(0,0,0,0.6) 100%);}
+
+/* ── LAYOUT ── */
+.app{position:relative;z-index:2;width:100%;max-width:480px;margin:0 auto;padding:0 12px 10px;}
+
+/* ── HEADER ── */
+.header{text-align:center;padding:20px 0 14px;position:relative;}
+.header-line{width:100%;height:1px;background:linear-gradient(90deg,transparent,var(--border2),transparent);margin-bottom:10px;}
+.sys-title{
+  font-family:'Orbitron',sans-serif;font-size:20px;font-weight:900;
+  letter-spacing:10px;color:var(--cyan);
+  text-shadow:0 0 20px rgba(0,212,255,0.5),0 0 60px rgba(0,212,255,0.2);
+  animation:pulse-title 4s ease-in-out infinite;
+}
+@keyframes pulse-title{0%,100%{text-shadow:0 0 20px rgba(0,212,255,.5),0 0 60px rgba(0,212,255,.2);}50%{text-shadow:0 0 30px rgba(0,212,255,.8),0 0 80px rgba(0,212,255,.4);}}
+.vtag{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:3px;margin-top:5px;font-weight:700;-webkit-text-stroke:0.4px currentColor;}
+.corner{position:absolute;width:10px;height:10px;border-color:var(--cyan);border-style:solid;opacity:0.6;}
+.corner-tl{top:16px;left:0;border-width:1px 0 0 1px;}
+.corner-tr{top:16px;right:0;border-width:1px 1px 0 0;}
+
+/* ── CARD ── */
+.card{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:2px;
+  position:relative;
+  overflow:hidden;
+  margin-bottom:10px;
+}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(0,212,255,0.4),transparent);}
+.card-header{
+  padding:9px 14px 8px;
+  font-family:'Orbitron',sans-serif;font-size:8px;font-weight:700;
+  letter-spacing:4px;color:var(--muted2);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:8px;
+}
+.card-header::before{content:'';width:2px;height:9px;background:var(--cyan);flex-shrink:0;border-radius:1px;}
+
+/* ── PLAYER CARD ── */
+.player-card{padding:16px 16px 14px;}
+
+/* Row 1: name + rank badge + level box */
+.player-top-row{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+.pinfo{flex:1;min-width:0;}
+.pname{
+  font-family:'Orbitron',sans-serif;font-size:13px;font-weight:900;
+  color:var(--gold);letter-spacing:2px;line-height:1.25;
+  text-shadow:0 0 18px rgba(240,192,64,0.35);
+}
+.ptitle{
+  font-family:'Share Tech Mono',monospace;font-size:9px;
+  color:var(--muted2);letter-spacing:3px;margin-top:5px;font-weight:700;
+}
+.vital-row{display:flex;align-items:center;gap:10px;margin-top:7px;}
+.vital{display:flex;align-items:center;gap:4px;font-size:11px;font-weight:700;font-family:'Share Tech Mono',monospace;}
+.vital-icon{font-size:8px;font-family:'Orbitron',sans-serif;font-weight:900;letter-spacing:1px;}
+.vital.hp .vital-icon{color:var(--red);}
+.vital.mp .vital-icon{color:#4488ff;}
+.vital.hp span{color:#ff7788;}
+.vital.mp span{color:#5599ff;}
+.vital-sep{color:var(--border2);font-size:10px;}
+
+/* ── RANK BADGE ── */
+.rank-badge{
+  width:62px;height:62px;flex-shrink:0;
+  border:1px solid;border-radius:2px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;
+}
+.rank-badge::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,0.04),transparent 60%);
+}
+.rank-letter{font-family:'Orbitron',sans-serif;font-size:26px;font-weight:900;line-height:1;}
+.rank-label{font-size:6px;letter-spacing:3px;opacity:0.55;margin-top:3px;font-family:'Share Tech Mono',monospace;font-weight:700;}
+
+/* ── LEVEL BOX ── */
+.level-box{
+  flex-shrink:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:rgba(0,212,255,0.04);
+  border:1px solid var(--border);border-radius:2px;
+  padding:8px 14px;min-width:72px;
+}
+.level-label{
+  font-family:'Orbitron',sans-serif;font-size:7px;font-weight:700;
+  color:var(--muted2);letter-spacing:4px;margin-bottom:4px;
+}
+.level-num{
+  font-family:'Orbitron',sans-serif;font-size:26px;font-weight:900;
+  color:var(--cyan);line-height:1;
+  text-shadow:0 0 16px rgba(0,212,255,0.5);
+  letter-spacing:-1px;
+}
+.level-gain{
+  font-family:'Share Tech Mono',monospace;font-size:8px;font-weight:700;
+  color:var(--muted);letter-spacing:0px;margin-top:5px;
+  border-top:1px solid var(--border);padding-top:4px;width:100%;text-align:center;
+}
+
+/* ── XP BAR ── */
+.xp-section{margin-bottom:13px;}
+.xp-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.xp-label{font-family:'Orbitron',sans-serif;font-size:8px;font-weight:700;color:var(--muted2);letter-spacing:3px;}
+.xp-value{font-family:'Orbitron',sans-serif;font-size:10px;color:var(--cyan);font-weight:700;letter-spacing:1px;}
+.xp-track{
+  height:7px;background:rgba(0,100,200,0.06);
+  border:1px solid var(--border);border-radius:1px;overflow:hidden;position:relative;
+}
+.xp-fill{
+  height:100%;background:linear-gradient(90deg,#002244,#0088cc,var(--cyan));
+  transition:width .6s cubic-bezier(.4,0,.2,1);position:relative;
+}
+.xp-fill::after{
+  content:'';position:absolute;right:0;top:0;bottom:0;width:2px;
+  background:rgba(255,255,255,0.9);filter:blur(1px);
+}
+.xp-total{
+  font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;
+  color:var(--cyan);text-align:center;margin-top:7px;letter-spacing:4px;
+  text-shadow:0 0 12px rgba(0,212,255,0.35);
+  border:1px solid rgba(0,212,255,0.12);border-radius:1px;
+  padding:5px 0;background:rgba(0,212,255,0.04);
+}
+
+/* ── VITAL BARS ── */
+.vital-bars{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:13px;}
+.vbar-wrap{}
+.vbar-label{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
+.vbar-name{font-family:'Orbitron',sans-serif;font-size:8px;font-weight:700;letter-spacing:3px;}
+.vbar-name.hp{color:var(--red);}
+.vbar-name.mp{color:#4488ff;}
+.vbar-val{font-family:'Share Tech Mono',monospace;font-size:10px;font-weight:700;letter-spacing:1px;}
+.vbar-track{height:6px;border-radius:1px;border:1px solid;overflow:hidden;position:relative;}
+.vbar-track.hp{border-color:rgba(255,51,85,0.25);background:rgba(80,0,20,.12);}
+.vbar-track.mp{border-color:rgba(68,136,255,0.25);background:rgba(0,15,80,.12);}
+.vbar-fill{height:100%;}
+.vbar-fill.hp{background:linear-gradient(90deg,#660011,var(--red));}
+.vbar-fill.mp{background:linear-gradient(90deg,#001166,#4488ff);}
+
+/* ── STATS GRID ── */
+.stats-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:1px;background:var(--border);
+  border:1px solid var(--border);border-radius:2px;overflow:hidden;
+}
+.stat-cell{
+  background:rgba(0,6,18,0.92);
+  padding:11px 8px 10px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  position:relative;overflow:hidden;transition:background .15s;
+}
+.stat-cell:active{background:rgba(0,25,55,.9);}
+.stat-cell::after{
+  content:'';position:absolute;bottom:0;left:20%;right:20%;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(0,212,255,0.08),transparent);
+}
+.stat-name{
+  font-family:'Orbitron',sans-serif;font-size:7px;font-weight:700;
+  color:var(--muted);letter-spacing:3px;
+}
+.stat-val{
+  font-family:'Orbitron',sans-serif;font-size:17px;font-weight:900;
+  color:var(--cyan);line-height:1;letter-spacing:-0.5px;
+}
+
+/* ── TABS ── */
+.tab-card{background:var(--panel);border:1px solid var(--border);border-radius:2px;overflow:hidden;margin-bottom:10px;}
+.tabs{display:flex;border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none;background:rgba(0,5,15,0.5);}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{
+  padding:11px 12px;
+  font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;
+  letter-spacing:2px;color:var(--muted);
+  cursor:pointer;white-space:nowrap;flex-shrink:0;
+  background:none;border:none;border-bottom:2px solid transparent;
+  transition:color .2s,border-color .2s;
+}
+.tab.active{color:var(--cyan);border-bottom-color:var(--cyan);}
+.tab:active{background:rgba(0,212,255,0.05);}
+.tc{padding:12px;display:none;}
+.tc.active{display:block;}
+
+/* ── TIMER ── */
+.timer-wrap{
+  background:rgba(0,5,15,0.5);border:1px solid var(--border);
+  border-radius:2px;padding:12px 14px;margin-bottom:8px;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.timer-label{font-family:'Orbitron',sans-serif;font-size:7px;font-weight:700;color:var(--muted);letter-spacing:4px;margin-bottom:5px;}
+.timer-val{
+  font-family:'Orbitron',sans-serif;font-size:22px;font-weight:700;
+  color:var(--cyan);letter-spacing:4px;
+  text-shadow:0 0 14px rgba(0,212,255,0.3);
+}
+.timer-right{font-family:'Share Tech Mono',monospace;font-size:8px;font-weight:700;color:var(--muted);text-align:right;letter-spacing:1px;line-height:1.8;}
+
+/* ── QUEST COUNTER ── */
+.quest-counter{
+  background:rgba(0,5,15,0.5);border:1px solid var(--border);
+  border-radius:2px;padding:9px 12px;margin-bottom:8px;
+  font-family:'Share Tech Mono',monospace;font-size:10px;font-weight:700;
+  color:var(--muted2);letter-spacing:1px;
+  display:flex;align-items:center;gap:8px;
+}
+.quest-counter::before{content:'▶';color:var(--cyan);font-size:7px;flex-shrink:0;}
+
+/* ── SECTION LABEL ── */
+.section-label{
+  font-family:'Orbitron',sans-serif;font-size:8px;font-weight:700;
+  color:var(--muted2);letter-spacing:4px;
+  margin:10px 0 8px;padding:5px 10px;
+  border-left:2px solid var(--cyan);
+  background:rgba(0,212,255,0.03);
+  border-radius:0 1px 1px 0;
+}
+
+/* ── QUEST ITEM ── */
+.qi{
+  background:rgba(0,6,18,0.75);border:1px solid var(--border);
+  border-radius:2px;padding:11px 12px;margin-bottom:6px;
+  display:flex;align-items:center;gap:11px;cursor:pointer;
+  position:relative;overflow:hidden;min-height:52px;
+  transition:border-color .15s,background .15s;
+}
+.qi::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:2px;
+  background:var(--border);transition:background .15s;
+}
+.qi:not(.done):active{background:rgba(0,30,60,.7);}
+.qi:not(.done):active::before{background:var(--cyan);}
+.qi.done{opacity:.3;border-color:rgba(13,42,80,0.3);cursor:default;}
+.qi.done::after{
+  content:'DONE ✓';position:absolute;right:12px;top:50%;transform:translateY(-50%);
+  font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:2px;color:var(--green);
+  font-weight:700;
+}
+.qi.done .qxp{visibility:hidden;}
+.qcb{
+  width:18px;height:18px;min-width:18px;
+  border:1px solid var(--border2);border-radius:1px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.qi.done .qcb{background:var(--green);border-color:var(--green);}
+.qck{font-size:10px;color:#020810;display:none;font-weight:900;}
+.qi.done .qck{display:block;}
+.qinfo{flex:1;min-width:0;}
+.qname{font-size:13px;font-weight:700;color:var(--text);line-height:1.25;font-family:'Rajdhani',sans-serif;letter-spacing:0.3px;}
+.qrew{font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--muted);margin-top:2px;letter-spacing:1px;font-weight:700;}
+.qxp{
+  font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;
+  color:var(--gold);white-space:nowrap;flex-shrink:0;padding-left:8px;letter-spacing:1px;
+}
+
+/* ── RANK TAB ── */
+.rank-list{display:flex;flex-direction:column;gap:10px;}
+
+.rcard{
+  border:1px solid;border-radius:2px;padding:0;
+  position:relative;overflow:hidden;
+  transition:transform .2s,box-shadow .3s;
+  background:rgba(0,3,10,0.95);
+}
+.rcard.current{transform:scale(1.01);}
+.rcard.locked{opacity:0.38;filter:saturate(0.3);}
+
+/* top glow line */
+.rcard::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,currentColor,transparent);
+  opacity:0.7;
+}
+
+/* shimmer sweep on current */
+.rcard.current .rc-shimmer{
+  position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:linear-gradient(110deg,transparent 35%,rgba(255,255,255,0.05) 50%,transparent 65%);
+  animation:shimmer 4s ease-in-out infinite;
+}
+@keyframes shimmer{0%{transform:translateX(-120%);}100%{transform:translateX(220%);}}
+
+.rcard-inner{display:flex;align-items:stretch;gap:0;min-height:90px;}
+
+/* ── LEFT AURA PANEL ── */
+.rc-left{
+  width:80px;min-width:80px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  position:relative;flex-shrink:0;
+  border-right:1px solid rgba(255,255,255,0.06);
+  overflow:hidden;
+}
+
+/* base radial aura always present */
+.rc-aura-base{
+  position:absolute;inset:0;
+  background:radial-gradient(ellipse at center, currentColor 0%, transparent 65%);
+}
+
+/* aura rings - animated on current rank */
+.rc-aura-ring{
+  position:absolute;border-radius:50%;border:1px solid currentColor;
+  left:50%;top:50%;transform:translate(-50%,-50%);
+  opacity:0;
+}
+.rcard.current .rc-aura-ring{animation:aura-ring 2.5s ease-out infinite;}
+.rc-aura-ring:nth-child(2){animation-delay:0s;  width:50px; height:50px;}
+.rc-aura-ring:nth-child(3){animation-delay:0.5s;width:70px; height:70px;}
+.rc-aura-ring:nth-child(4){animation-delay:1s;  width:90px; height:90px;}
+.rc-aura-ring:nth-child(5){animation-delay:1.5s;width:110px;height:110px;}
+.rc-aura-ring:nth-child(6){animation-delay:2s;  width:130px;height:130px;}
+@keyframes aura-ring{
+  0%{opacity:0.7;transform:translate(-50%,-50%) scale(0.4);}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(1);}
+}
+
+/* flame wisps on current rank */
+.rc-flame{
+  position:absolute;bottom:0;width:6px;border-radius:50% 50% 0 0;
+  opacity:0;background:currentColor;filter:blur(3px);
+}
+.rcard.current .rc-flame{animation:flame-up 1.8s ease-in-out infinite;}
+.rc-flame:nth-child(7){left:25%;height:20px;animation-delay:0s;}
+.rc-flame:nth-child(8){left:45%;height:28px;animation-delay:0.3s;}
+.rc-flame:nth-child(9){left:65%;height:18px;animation-delay:0.6s;}
+.rc-flame:nth-child(10){left:35%;height:24px;animation-delay:0.9s;}
+@keyframes flame-up{
+  0%{opacity:0;transform:translateY(0) scaleX(1);}
+  40%{opacity:0.7;}
+  100%{opacity:0;transform:translateY(-40px) scaleX(0.3);}
+}
+
+.rc-letter{
+  font-family:'Orbitron',sans-serif;font-size:32px;font-weight:900;
+  line-height:1;position:relative;z-index:3;
+}
+.rcard.current .rc-letter{animation:letter-pulse 2s ease-in-out infinite;}
+@keyframes letter-pulse{0%,100%{filter:drop-shadow(0 0 6px currentColor);}50%{filter:drop-shadow(0 0 18px currentColor) drop-shadow(0 0 30px currentColor);}}
+
+.rc-rank-label{
+  font-family:'Share Tech Mono',monospace;font-size:7px;
+  letter-spacing:3px;opacity:0.55;margin-top:4px;
+  position:relative;z-index:3;font-weight:700;
+}
+
+/* ── MIDDLE INFO ── */
+.rc-mid{flex:1;padding:12px 12px 10px;min-width:0;position:relative;z-index:3;}
+.rc-name{
+  font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;
+  letter-spacing:3px;line-height:1;margin-bottom:6px;
+}
+.rc-desc{
+  font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:600;
+  color:var(--muted2);line-height:1.4;margin-bottom:8px;
+}
+.rc-stats{display:flex;gap:6px;flex-wrap:wrap;}
+.rc-stat{
+  font-family:'Share Tech Mono',monospace;font-size:8px;font-weight:700;
+  padding:2px 7px;border:1px solid;border-radius:1px;
+  opacity:0.85;letter-spacing:1px;
+}
+
+/* ── RIGHT MP PANEL ── */
+.rc-right{
+  padding:10px 10px;text-align:center;
+  border-left:1px solid rgba(255,255,255,0.05);
+  flex-shrink:0;min-width:68px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  position:relative;z-index:3;
+}
+.rc-mp{
+  font-family:'Orbitron',sans-serif;font-size:14px;font-weight:900;line-height:1;
+}
+.rc-mp-label{font-family:'Share Tech Mono',monospace;font-size:7px;letter-spacing:2px;opacity:0.45;font-weight:700;}
+
+/* YOU badge */
+.rc-you{
+  font-family:'Orbitron',sans-serif;font-size:7px;font-weight:900;
+  letter-spacing:2px;padding:3px 6px;
+  border:1px solid;border-radius:1px;
+  background:rgba(0,0,0,0.5);margin-top:4px;
+  animation:pulse-you 2s ease-in-out infinite;
+}
+@keyframes pulse-you{0%,100%{opacity:1;}50%{opacity:0.5;}}
+
+.rc-locked-bar{
+  position:absolute;bottom:0;left:0;right:0;height:2px;
+  background:rgba(255,255,255,0.04);
+}
+.rc-progress{height:100%;transition:width .6s ease;}
+
+/* ── SAVE CARD ── */
+.save-card{background:var(--panel);border:1px solid var(--border);border-radius:2px;overflow:hidden;margin-bottom:10px;}
+.save-btns{display:flex;gap:1px;background:var(--border);}
+.save-btn{
+  flex:1;padding:14px 8px;
+  font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;letter-spacing:2px;
+  background:rgba(0,8,22,0.95);border:none;cursor:pointer;
+  transition:background .2s;
+}
+.save-btn:active{background:rgba(0,35,70,0.8);}
+.save-btn.export{color:var(--cyan);}
+.save-btn.import{color:var(--gold);}
+.save-hint{
+  padding:8px 14px 10px;
+  font-family:'Share Tech Mono',monospace;font-size:9px;
+  color:var(--muted);letter-spacing:1px;line-height:1.7;
+}
+
+/* ── NOTE BOX ── */
+.fnote{
+  font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--muted);
+  padding:8px 10px;border:1px solid var(--border);border-radius:2px;
+  margin-bottom:8px;letter-spacing:1px;line-height:1.6;
+  border-left:2px solid var(--gold-dim);
+}
+
+/* ── NOTIFICATION OVERLAY ── */
+.notifoverlay{display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.9);align-items:center;justify-content:center;padding:20px;}
+.notifoverlay.show{display:flex;}
+.notifbox{
+  background:rgba(2,8,20,.99);border:1px solid var(--border2);
+  border-radius:2px;width:100%;max-width:360px;
+  box-shadow:0 0 60px rgba(0,212,255,.12),0 0 120px rgba(0,212,255,.05);
+  position:relative;overflow:hidden;
+}
+.notifbox::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--cyan),transparent);}
+.nh{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);}
+.ni{
+  width:36px;height:36px;border:1px solid var(--cyan);border-radius:2px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;color:var(--cyan);font-family:'Orbitron',sans-serif;font-weight:900;flex-shrink:0;
+}
+.ntitle{font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;letter-spacing:4px;color:var(--cyan);}
+.nbody{padding:22px 20px;text-align:center;font-size:14px;line-height:1.9;font-weight:600;}
+.ngreen{color:var(--green);font-weight:700;}
+.nbtns{display:flex;border-top:1px solid var(--border);}
+.nbtn{
+  flex:1;padding:15px;background:none;border:none;cursor:pointer;
+  font-family:'Orbitron',sans-serif;font-size:11px;letter-spacing:2px;color:var(--text);min-height:50px;
+  transition:background .2s;
+}
+.nbtn:active{background:rgba(0,212,255,0.05);}
+.nbtn.yes{color:var(--cyan);border-right:1px solid var(--border);}
+.nbtn.no{color:var(--red);}
+
+/* ── XP FLASH ── */
+.flash{
+  position:fixed;top:12%;left:50%;transform:translateX(-50%);
+  font-family:'Orbitron',sans-serif;font-size:22px;font-weight:900;
+  color:var(--gold);pointer-events:none;z-index:9999;
+  animation:fup 1.6s ease forwards;white-space:nowrap;
+  text-shadow:0 0 20px rgba(240,192,64,0.6);
+}
+@keyframes fup{0%{opacity:1;transform:translateX(-50%) translateY(0);}80%{opacity:1;}100%{opacity:0;transform:translateX(-50%) translateY(-80px);}}
+.sup{font-size:11px;color:var(--green);display:block;text-align:center;text-shadow:0 0 8px rgba(0,255,136,0.6);margin-top:2px;}
+
+/* ═══════════════════════════════════════
+   EPIC DAILY COMPLETE OVERLAY
+═══════════════════════════════════════ */
+/* aura rings */
+.epic-ring{position:absolute;width:var(--size);height:var(--size);border-radius:50%;border:1px solid var(--rc);animation:epicRingExpand 3s ease-out var(--delay) infinite;opacity:0;}
+.epic-ring-pulse{animation:epicRingPulse 2.4s ease-in-out var(--delay) infinite !important;opacity:0.15 !important;}
+@keyframes epicRingExpand{0%{opacity:0.7;transform:scale(0.15);}70%{opacity:0.25;}100%{opacity:0;transform:scale(1.5);}}
+@keyframes epicRingPulse{0%,100%{opacity:0.08;transform:scale(0.95);}50%{opacity:0.28;transform:scale(1.05);}}
+
+/* particle sparks */
+.epic-spark{position:absolute;width:2px;border-radius:2px;animation:sparkShoot var(--sd) ease-out var(--sl) infinite;opacity:0;}
+@keyframes sparkShoot{0%{opacity:0;transform:translate(0,0) scale(1);}20%{opacity:1;}100%{opacity:0;transform:translate(var(--sx),var(--sy)) scale(0);}}
+
+/* main card entry */
+#epicCard{animation:epicCardIn 0.65s cubic-bezier(0.34,1.15,0.64,1) both;}
+@keyframes epicCardIn{0%{opacity:0;transform:scale(0.8) translateY(24px);}100%{opacity:1;transform:scale(1) translateY(0);}}
+
+/* main box — matches .card styling */
+.epic-main-box{
+  background:rgba(2,9,28,0.99);
+  border:1px solid var(--border2);
+  border-radius:2px;position:relative;overflow:hidden;
+  box-shadow:0 0 60px rgba(0,212,255,0.12),0 0 120px rgba(0,212,255,0.05),inset 0 0 40px rgba(0,212,255,0.02);
+}
+.epic-main-box::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);}
+
+/* top beam — rainbow sliding */
+.epic-top-beam{height:2px;background:linear-gradient(90deg,transparent,var(--cyan),var(--gold),var(--green),var(--cyan),transparent);background-size:300% 100%;animation:beamSlide 2s linear infinite;}
+@keyframes beamSlide{0%{background-position:200% 0;}100%{background-position:-100% 0;}}
+.epic-bot-beam{height:1px;background:linear-gradient(90deg,transparent,rgba(0,212,255,0.3),transparent);margin-top:0;}
+
+/* corner decorations */
+.epic-corner{position:absolute;width:10px;height:10px;border-color:var(--cyan);border-style:solid;opacity:0.5;}
+.epic-corner.tl{top:0;left:0;border-width:1px 0 0 1px;}
+.epic-corner.tr{top:0;right:0;border-width:1px 1px 0 0;}
+.epic-corner.bl{bottom:0;left:0;border-width:0 0 1px 1px;}
+.epic-corner.br{bottom:0;right:0;border-width:0 1px 1px 0;}
+
+/* spinning seal */
+.epic-seal{display:flex;align-items:center;justify-content:center;margin-bottom:-28px;position:relative;z-index:6;}
+.epic-seal-inner{width:64px;height:64px;position:relative;display:flex;align-items:center;justify-content:center;}
+.epic-seal-ring{position:absolute;border-radius:50%;border:1px solid;}
+.epic-seal-ring.r1{width:64px;height:64px;border-color:var(--cyan);box-shadow:0 0 12px var(--cyan),inset 0 0 8px rgba(0,212,255,0.08);animation:sealSpin 7s linear infinite;}
+.epic-seal-ring.r2{width:48px;height:48px;border-color:var(--gold);box-shadow:0 0 8px var(--gold);animation:sealSpin 4s linear infinite reverse;}
+.epic-seal-ring.r3{width:30px;height:30px;border-color:var(--green);box-shadow:0 0 6px var(--green);animation:sealSpin 2.5s linear infinite;}
+@keyframes sealSpin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
+.epic-seal-symbol{font-size:20px;position:relative;z-index:2;animation:sealPulse 1.6s ease-in-out infinite;filter:drop-shadow(0 0 6px var(--gold));}
+@keyframes sealPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.18);}}
+
+/* system tag */
+.epic-sys-tag{font-family:'Share Tech Mono',monospace;font-size:8px;font-weight:700;letter-spacing:5px;color:var(--muted);margin-bottom:14px;}
+
+/* title */
+.epic-title-row{display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:10px;}
+.epic-title-divider{flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--border2));}
+.epic-title-divider:last-child{background:linear-gradient(270deg,transparent,var(--border2));}
+.epic-main-title{font-family:'Orbitron',sans-serif;font-size:26px;font-weight:900;line-height:1.05;color:var(--cyan);letter-spacing:3px;text-shadow:0 0 20px rgba(0,212,255,0.6),0 0 50px rgba(0,212,255,0.25);animation:titleBreath 2.5s ease-in-out infinite;}
+@keyframes titleBreath{0%,100%{text-shadow:0 0 20px rgba(0,212,255,0.6),0 0 50px rgba(0,212,255,0.25);}50%{text-shadow:0 0 30px rgba(0,212,255,0.9),0 0 70px rgba(0,212,255,0.45),0 0 100px rgba(240,192,64,0.1);}}
+
+.epic-sub{font-family:'Share Tech Mono',monospace;font-size:9px;font-weight:700;letter-spacing:4px;color:var(--green);margin-bottom:18px;text-shadow:0 0 8px rgba(0,255,136,0.4);}
+
+/* stat row — matches card-header style */
+.epic-stats-row{display:flex;justify-content:center;gap:6px;margin-bottom:18px;}
+.epic-stat-chip{font-family:'Orbitron',sans-serif;font-size:8px;font-weight:700;letter-spacing:2px;padding:4px 8px;border:1px solid;border-radius:1px;animation:chipPop 0.5s cubic-bezier(0.34,1.5,0.64,1) both,chipFloat 2.2s ease-in-out infinite;}
+.epic-stat-chip:nth-child(1){animation-delay:0.05s,0s;}
+.epic-stat-chip:nth-child(2){animation-delay:0.10s,0.3s;}
+.epic-stat-chip:nth-child(3){animation-delay:0.15s,0.6s;}
+.epic-stat-chip:nth-child(4){animation-delay:0.20s,0.9s;}
+.epic-stat-chip:nth-child(5){animation-delay:0.25s,1.2s;}
+.epic-stat-chip:nth-child(6){animation-delay:0.30s,1.5s;}
+@keyframes chipPop{0%{opacity:0;transform:scale(0) translateY(8px);}100%{opacity:1;transform:scale(1) translateY(0);}}
+@keyframes chipFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-3px);}}
+
+/* XP block */
+.epic-xp-block{background:rgba(0,212,255,0.03);border:1px solid var(--border);border-radius:2px;padding:16px 20px;margin-bottom:16px;position:relative;overflow:hidden;}
+.epic-xp-block::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,212,255,0.3),transparent);}
+.epic-reward-lbl{font-family:'Orbitron',sans-serif;font-size:7px;font-weight:700;letter-spacing:5px;color:var(--muted2);margin-bottom:10px;}
+.epic-xp-num-row{display:flex;align-items:baseline;justify-content:center;gap:3px;}
+.epic-plus{font-family:'Orbitron',sans-serif;font-size:24px;font-weight:900;color:var(--gold);text-shadow:0 0 16px rgba(240,192,64,0.7);}
+.epic-xp-big{font-family:'Orbitron',sans-serif;font-size:56px;font-weight:900;color:var(--gold);line-height:1;letter-spacing:-2px;text-shadow:0 0 24px rgba(240,192,64,0.8),0 0 50px rgba(240,192,64,0.35);animation:xpGlow 1.8s ease-in-out infinite;}
+@keyframes xpGlow{0%,100%{text-shadow:0 0 24px rgba(240,192,64,0.8),0 0 50px rgba(240,192,64,0.35);}50%{text-shadow:0 0 40px rgba(240,192,64,1),0 0 80px rgba(240,192,64,0.6),0 0 120px rgba(240,192,64,0.2);}}
+.epic-xp-unit{font-family:'Orbitron',sans-serif;font-size:20px;font-weight:900;color:var(--gold);opacity:0.5;}
+
+/* quote */
+.epic-quote{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;line-height:1.8;margin-bottom:20px;border-left:2px solid rgba(240,192,64,0.2);padding-left:10px;text-align:left;font-weight:700;}
+
+/* CLAIM BUTTON — matches .save-btn style but supercharged */
+.epic-claim-btn{
+  width:100%;padding:0;border:none;cursor:pointer;
+  background:none;position:relative;overflow:hidden;border-radius:2px;
+  display:block;
+}
+.epic-btn-border{
+  position:absolute;inset:0;border-radius:2px;padding:1.5px;
+  background:linear-gradient(90deg,var(--cyan),var(--gold),var(--green),var(--cyan));
+  background-size:300% 100%;
+  animation:btnBorderSlide 2s linear infinite;
+  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;
+}
+@keyframes btnBorderSlide{0%{background-position:0% 0;}100%{background-position:300% 0;}}
+.epic-btn-body{
+  position:relative;z-index:2;
+  display:flex;align-items:center;justify-content:center;gap:14px;
+  padding:16px 20px;
+  background:rgba(0,8,22,0.97);
+  transition:background 0.2s;
+}
+.epic-claim-btn:active .epic-btn-body{background:rgba(0,20,50,0.97);}
+.epic-btn-lbl{font-family:'Orbitron',sans-serif;font-size:12px;font-weight:900;letter-spacing:4px;color:#fff;text-shadow:0 0 12px rgba(0,212,255,0.6);}
+.epic-btn-diamond{font-size:9px;color:var(--gold);text-shadow:0 0 6px var(--gold);animation:diamondSpin 3s linear infinite;}
+.epic-btn-diamond:last-child{animation-direction:reverse;}
+@keyframes diamondSpin{0%{transform:rotate(0);}100%{transform:rotate(360deg);}}
+/* scanline sweep */
+.epic-claim-btn::after{content:'';position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(90deg,transparent,rgba(0,212,255,0.08),transparent);animation:btnSweep 3s ease-in-out infinite;pointer-events:none;z-index:3;}
+@keyframes btnSweep{0%{left:-60%;}100%{left:160%;}}
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+<div class="scanlines"></div>
+<div class="vignette"></div>
+
+<div class="app">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="corner corner-tl"></div>
+    <div class="corner corner-tr"></div>
+    <div class="header-line"></div>
+    <div class="sys-title">[ SYSTEM ]</div>
+    <div class="vtag">SOLO LEVELING — V2.0 NEW BEGINNINGS</div>
+    <div class="header-line" style="margin-top:10px;margin-bottom:0;"></div>
+    <button id="muteBtn" onclick="toggleMute()" style="position:absolute;top:10px;right:14px;background:none;border:1px solid rgba(0,212,255,0.2);border-radius:2px;color:#3a6080;font-size:13px;padding:3px 7px;cursor:pointer;font-family:'Share Tech Mono',monospace;transition:color 0.2s,border-color 0.2s;" onmouseover="this.style.color='#00d4ff';this.style.borderColor='rgba(0,212,255,0.5)'" onmouseout="this.style.color='#3a6080';this.style.borderColor='rgba(0,212,255,0.2)'">🔊</button>
+  </div>
+
+  <!-- PLAYER CARD -->
+  <div class="card">
+    <div class="card-header">HUNTER STATUS</div>
+    <div class="player-card">
+
+      <!-- Top row: info + rank + level -->
+      <div class="player-top-row">
+        <div class="pinfo">
+          <div class="pname">ANTONIO<br>ORBULETU</div>
+          <div class="ptitle" id="rankTitle">RANK-E</div>
+          <div class="vital-row">
+            <div class="vital hp"><span class="vital-icon">HP</span><span id="hpTxt">100/100</span></div>
+            <span class="vital-sep">·</span>
+            <div class="vital mp"><span class="vital-icon">MP</span><span id="mpTxt">10/10</span></div>
+          </div>
+        </div>
+        <div class="rank-badge" id="rankBadge" style="color:#aaa;border-color:#333;">
+          <span class="rank-letter" id="rankLtr">E</span>
+          <span class="rank-label">RANK</span>
+        </div>
+        <div class="level-box">
+          <div class="level-label">LEVEL</div>
+          <div class="level-num" id="lvlNum">1</div>
+          <div class="level-gain" id="nextGain">+5HP +2MP</div>
+        </div>
+      </div>
+
+      <!-- XP Bar -->
+      <div class="xp-section">
+        <div class="xp-header">
+          <span class="xp-label">EXPERIENCE</span>
+          <span class="xp-value" id="xplbl">0 / 100 XP</span>
+        </div>
+        <div class="xp-track">
+          <div class="xp-fill" id="xpbar" style="width:0%;"></div>
+        </div>
+        <div class="xp-total" id="totxp">TOTAL XP: 0</div>
+      </div>
+
+      <!-- HP / MP bars -->
+      <div class="vital-bars">
+        <div class="vbar-wrap">
+          <div class="vbar-label">
+            <span class="vbar-name hp">HP</span>
+            <span class="vbar-val" id="hpbl">100/100</span>
+          </div>
+          <div class="vbar-track hp"><div class="vbar-fill hp" id="hpbar" style="width:100%;"></div></div>
+        </div>
+        <div class="vbar-wrap">
+          <div class="vbar-label">
+            <span class="vbar-name mp">MP</span>
+            <span class="vbar-val" id="mpbl">10/10</span>
+          </div>
+          <div class="vbar-track mp"><div class="vbar-fill mp" id="mpbar" style="width:100%;"></div></div>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-cell"><span class="stat-name">STR</span><span class="stat-val" id="sSTR">10</span></div>
+        <div class="stat-cell"><span class="stat-name">VIT</span><span class="stat-val" id="sVIT">10</span></div>
+        <div class="stat-cell"><span class="stat-name">AGI</span><span class="stat-val" id="sAGI">10</span></div>
+        <div class="stat-cell"><span class="stat-name">INT</span><span class="stat-val" id="sINT">10</span></div>
+        <div class="stat-cell"><span class="stat-name">STA</span><span class="stat-val" id="sSTA">10</span></div>
+        <div class="stat-cell"><span class="stat-name">APP</span><span class="stat-val" id="sAPP">10</span></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- QUEST CARD -->
+  <div class="tab-card">
+    <div class="tabs">
+      <button class="tab active" onclick="sw('daily',this)">DAILY</button>
+      <button class="tab" onclick="sw('str',this)">STR</button>
+      <button class="tab" onclick="sw('vit',this)">VIT</button>
+      <button class="tab" onclick="sw('agi',this)">AGI</button>
+      <button class="tab" onclick="sw('int',this)">INT</button>
+      <button class="tab" onclick="sw('sta',this)">STA</button>
+      <button class="tab" onclick="sw('app',this)">APP</button>
+      <button class="tab" onclick="sw('bucket',this)">BUCKET</button>
+      <button class="tab" onclick="sw('ranks',this)">RANKS</button>
+    </div>
+
+    <div class="tc active" id="tc-daily">
+      <div class="timer-wrap">
+        <div>
+          <div class="timer-label">DAILY RESET IN</div>
+          <div class="timer-val" id="resetTimer">--:--:--</div>
+        </div>
+        <div class="timer-right">AUTO RESETS<br>AT MIDNIGHT</div>
+      </div>
+      <div class="quest-counter" id="questCounter">QUESTS TODAY: 0/14 — DO 14 FOR +10 XP BONUS</div>
+      <div class="section-label">DAILY QUESTS</div>
+      <div class="qi" id="dq-nofap" onclick="doDaily('nofap',4,'No Fap')">
+        <div class="qcb"><span class="qck">✓</span></div>
+        <div class="qinfo"><div class="qname">Don't Masturbate</div><div class="qrew">DAILY DISCIPLINE</div></div>
+        <div class="qxp">+4 XP</div>
+      </div>
+      <div class="qi" id="dq-posture" onclick="doDaily('posture',3,'Short Posture Routine')">
+        <div class="qcb"><span class="qck">✓</span></div>
+        <div class="qinfo"><div class="qname">Short Posture Routine</div><div class="qrew">DAILY DISCIPLINE</div></div>
+        <div class="qxp">+3 XP</div>
+      </div>
+    </div>
+
+    <div class="tc" id="tc-str"><div class="section-label">STRENGTH QUESTS</div><div id="ql-str"></div></div>
+    <div class="tc" id="tc-vit"><div class="section-label">VITALITY QUESTS</div><div id="ql-vit"></div></div>
+    <div class="tc" id="tc-agi"><div class="section-label">AGILITY QUESTS</div><div id="ql-agi"></div></div>
+    <div class="tc" id="tc-int"><div class="section-label">INTELLIGENCE QUESTS</div><div id="ql-int"></div></div>
+    <div class="tc" id="tc-sta"><div class="section-label">STAMINA QUESTS</div><div id="ql-sta"></div></div>
+    <div class="tc" id="tc-app"><div class="section-label">APPEARANCE QUESTS</div><div id="ql-app"></div></div>
+    <div class="tc" id="tc-bucket">
+      <div class="section-label">2026 BUCKET LIST — ONE TIME</div>
+      <div class="fnote">FNAF 1–4 share a total of 225 XP split across all 4 games (56/56/56/57 XP).</div>
+      <div id="ql-bucket"></div>
+    </div>
+    <div class="tc" id="tc-ranks">
+      <div class="section-label">HUNTER RANK TABLE</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:10px;padding:8px 10px;background:rgba(0,212,255,0.03);border:1px solid var(--border);border-radius:2px;font-weight:700;">
+        RANK IS DETERMINED BY TOTAL MP · GAIN MP EVERY LEVEL-UP · VIT BOOSTS HP · INT BOOSTS MP
+      </div>
+      <div class="rank-list" id="rankGrid"></div>
+    </div>
+  </div>
+
+  <!-- SAVE CARD -->
+  <div class="save-card">
+    <div class="card-header">SAVE DATA</div>
+    <div class="save-btns">
+      <button class="save-btn export" onclick="exportSave()">▲ EXPORT SAVE</button>
+      <button class="save-btn import" onclick="openImport()">▼ IMPORT SAVE</button>
+    </div>
+    <div class="save-hint">Export copies your save to clipboard. Send it to Claude when requesting updates so your progress is never lost.</div>
+
+  </div>
+
+</div>
+
+<!-- IMPORT OVERLAY -->
+<div class="notifoverlay" id="importBg">
+  <div class="notifbox" style="max-width:380px;">
+    <div class="nh"><div class="ni" style="font-size:12px;">IN</div><div class="ntitle">IMPORT SAVE</div></div>
+    <div style="padding:14px 16px 8px;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px;">Paste your exported save data below:</div>
+    <div style="padding:0 16px 14px;">
+      <textarea id="importText" style="width:100%;height:120px;background:rgba(0,5,15,.9);border:1px solid var(--border2);border-radius:2px;color:var(--text);font-family:'Share Tech Mono',monospace;font-size:11px;padding:10px;resize:none;outline:none;" placeholder="Paste save data here..."></textarea>
+    </div>
+    <div class="nbtns">
+      <button class="nbtn yes" onclick="doImport()">LOAD</button>
+      <button class="nbtn no" onclick="document.getElementById('importBg').classList.remove('show')">CANCEL</button>
+    </div>
+  </div>
+</div>
+
+<!-- NOTIFICATION OVERLAY -->
+<div class="notifoverlay" id="notifBg">
+  <div class="notifbox">
+    <div class="nh"><div class="ni">!</div><div class="ntitle">NOTIFICATION</div></div>
+    <div class="nbody" id="nbody"></div>
+    <div class="nbtns" id="nbtns"></div>
+  </div>
+</div>
+
+<!-- EPIC DAILY COMPLETE OVERLAY -->
+<div id="epicOverlay" style="display:none;position:fixed;inset:0;z-index:10000;align-items:center;justify-content:center;padding:16px;">
+  <canvas id="confettiCanvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1;"></canvas>
+  <!-- dark backdrop matching game bg -->
+  <div style="position:absolute;inset:0;background:rgba(2,9,18,0.97);z-index:0;"></div>
+  <!-- scanlines overlay (same as game) -->
+  <div style="position:absolute;inset:0;z-index:1;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.04) 2px,rgba(0,0,0,0.04) 4px);"></div>
+
+  <!-- aura rings -->
+  <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:2;">
+    <div class="epic-ring" style="--rc:#00d4ff;--delay:0s;--size:100px;"></div>
+    <div class="epic-ring" style="--rc:#f0c040;--delay:0.35s;--size:210px;"></div>
+    <div class="epic-ring" style="--rc:#00ff88;--delay:0.7s;--size:340px;"></div>
+    <div class="epic-ring" style="--rc:#00d4ff;--delay:1.05s;--size:490px;"></div>
+    <div class="epic-ring" style="--rc:#f0c040;--delay:1.4s;--size:660px;"></div>
+    <div class="epic-ring epic-ring-pulse" style="--rc:#00d4ff;--delay:0s;--size:140px;"></div>
+    <div class="epic-ring epic-ring-pulse" style="--rc:#f0c040;--delay:1s;--size:260px;"></div>
+  </div>
+
+  <!-- card -->
+  <div id="epicCard" style="position:relative;z-index:5;width:100%;max-width:360px;text-align:center;">
+
+    <!-- spinning seal above card -->
+    <div class="epic-main-box">
+      <div class="epic-corner tl"></div>
+      <div class="epic-corner tr"></div>
+      <div class="epic-corner bl"></div>
+      <div class="epic-corner br"></div>
+
+      <div class="epic-top-beam"></div>
+
+      <div style="padding:26px 18px 20px;">
+        <!-- system tag matching .card-header style -->
+        <div class="epic-sys-tag">[ SYSTEM MESSAGE ]</div>
+
+        <!-- title row -->
+        <div class="epic-title-row">
+          <div class="epic-title-divider"></div>
+          <div class="epic-main-title">DAILY<br>COMPLETE</div>
+          <div class="epic-title-divider"></div>
+        </div>
+
+        <div class="epic-sub">ALL 14 QUESTS COMPLETED</div>
+
+        <!-- stat chips (matches stat-name style) -->
+        <div class="epic-stats-row">
+          <div class="epic-stat-chip" style="--sc:#ff3355;color:#ff3355;border-color:rgba(255,51,85,0.35);background:rgba(255,51,85,0.05);">STR</div>
+          <div class="epic-stat-chip" style="--sc:#00d4ff;color:#00d4ff;border-color:rgba(0,212,255,0.35);background:rgba(0,212,255,0.05);">VIT</div>
+          <div class="epic-stat-chip" style="--sc:#00ff88;color:#00ff88;border-color:rgba(0,255,136,0.35);background:rgba(0,255,136,0.05);">AGI</div>
+          <div class="epic-stat-chip" style="--sc:#aa55ff;color:#aa55ff;border-color:rgba(170,85,255,0.35);background:rgba(170,85,255,0.05);">INT</div>
+          <div class="epic-stat-chip" style="--sc:#f0c040;color:#f0c040;border-color:rgba(240,192,64,0.35);background:rgba(240,192,64,0.05);">STA</div>
+          <div class="epic-stat-chip" style="--sc:#4488ff;color:#4488ff;border-color:rgba(68,136,255,0.35);background:rgba(68,136,255,0.05);">APP</div>
+        </div>
+
+        <!-- XP reward block -->
+        <div class="epic-xp-block">
+          <div class="epic-reward-lbl">BONUS REWARD</div>
+          <div class="epic-xp-num-row">
+            <span class="epic-plus">+</span>
+            <span class="epic-xp-big">10</span>
+            <span class="epic-xp-unit">XP</span>
+          </div>
+        </div>
+
+        <!-- flavor quote matching .fnote style -->
+        <div class="epic-quote">
+          "A true hunter never stops.<br>The grind is the path."
+        </div>
+
+        <!-- CLAIM button -->
+        <button class="epic-claim-btn" onclick="epicClaim()">
+          <div class="epic-btn-border"></div>
+          <div class="epic-btn-body">
+            <span class="epic-btn-diamond">◆</span>
+            <span class="epic-btn-lbl">CLAIM REWARD</span>
+            <span class="epic-btn-diamond">◆</span>
+          </div>
+        </button>
+      </div>
+
+      <div class="epic-bot-beam"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const RANKS=[
+  {l:'E',  n:'Rank-E',         mp:10,   c:'#8899aa', glow:'rgba(136,153,170,0.25)', hpLvl:4,  mpLvl:2,  auraLayers:1, desc:'The weakest hunters. Barely enough mana to qualify. Most never leave this rank.'},
+  {l:'D',  n:'Rank-D',         mp:50,   c:'#44cc66', glow:'rgba(68,204,102,0.28)',  hpLvl:6,  mpLvl:3,  auraLayers:2, desc:'Basic hunters. Can clear lower gates. Earning enough to sustain the lifestyle.'},
+  {l:'C',  n:'Rank-C',         mp:160,  c:'#4499ff', glow:'rgba(68,153,255,0.30)',  hpLvl:9,  mpLvl:4,  auraLayers:2, desc:'Professional level. Forms raid parties. Respected in the hunter community.'},
+  {l:'B',  n:'Rank-B',         mp:500,  c:'#aa55ff', glow:'rgba(170,85,255,0.32)',  hpLvl:13, mpLvl:6,  auraLayers:3, desc:'Elite hunters. Rare abilities. Often guild leaders. Handles most threats alone.'},
+  {l:'A',  n:'Rank-A',         mp:1200, c:'#ffcc00', glow:'rgba(255,204,0,0.35)',   hpLvl:19, mpLvl:9,  auraLayers:3, desc:'Top 1% of all hunters. National assets. Can solo high-tier dungeons. Celebrities.'},
+  {l:'S',  n:'Rank-S',         mp:1800, c:'#ff5500', glow:'rgba(255,85,0,0.38)',    hpLvl:28, mpLvl:13, auraLayers:4, desc:'A category beyond A-Rank. Can clear what entire A-Rank teams cannot. Legends.'},
+  {l:'NAT',n:'National Level', mp:2225, c:'#e8d5ff', glow:'rgba(232,213,255,0.45)', hpLvl:42, mpLvl:19, auraLayers:5, desc:'Above S-Rank. Power so extreme they influence wars between nations. Only a few exist.'},
+];
+const RQ={
+  str:[{id:'workout',n:'Workout',xp:8,r:{STR:.4}},{id:'grip',n:'Grip & Forearm & Hands Workout',xp:5,r:{STR:.3}}],
+  vit:[{id:'wakeup',n:'Wake Up Early',xp:3,r:{VIT:.03}},{id:'morning',n:'Morning Routine',xp:4,r:{VIT:.04}},{id:'evening',n:'Evening Routine',xp:4,r:{VIT:.04}},{id:'sleep',n:'Sleep Early',xp:3,r:{VIT:.03}},{id:'screen7',n:'Less Than 7h Screen Time',xp:4,r:{VIT:.03}},{id:'shower',n:'Shower & Cutting Nails',xp:5,r:{VIT:.05}}],
+  agi:[{id:'warmup',n:'Warm Up',xp:3,r:{AGI:.04}},{id:'walk',n:'Walk (Includes Running)',xp:3,r:{AGI:.05}}],
+  int:[{id:'write',n:'Write Everything At School',xp:2,r:{INT:.07}},{id:'hw',n:'Do Homework',xp:2,r:{INT:.07}},{id:'read30',n:'Read A Book For 30 Minutes',xp:3,r:{INT:.1}},{id:'study1h',n:'Study For An Hour',xp:8,r:{INT:.2}},{id:'study30',n:'Study For 30 Minutes',xp:4,r:{INT:.1}}],
+  sta:[{id:'walksta',n:'Walk (Includes Running)',xp:3,r:{STA:.08}},{id:'stamwk',n:'Stamina Training Through The Week',xp:5,r:{STA:.2}}],
+  app:[{id:'vaseline',n:'Daily Lip Care',xp:3,r:{APP:.04}},{id:'cleanser',n:'Cleanser & Anti Acne Cream-Gel',xp:4,r:{APP:.07}},{id:'patches',n:'Use Pimple Patches',xp:2,r:{APP:.02}},{id:'deod',n:'Use Deodorant and Fragrance',xp:3,r:{APP:.05}}],
+};
+const BQ=[
+  {id:'fnaf1',n:'Finish FNAF 1',xp:56,r:{AGI:.5}},
+  {id:'fnaf2',n:'Finish FNAF 2',xp:56,r:{AGI:.5}},
+  {id:'fnaf3',n:'Finish FNAF 3',xp:56,r:{AGI:.5}},
+  {id:'fnaf4',n:'Finish FNAF 4',xp:57,r:{AGI:.5}},
+  {id:'read12',n:'Read 12 Books',xp:720,r:{INT:12}},
+  {id:'kg60',n:'Get to 60 kg',xp:400,r:{STR:1,VIT:3}},
+  {id:'posture',n:'Fix Posture',xp:600,r:{AGI:6,APP:9}},
+  {id:'pass9',n:'Pass 9th Grade',xp:300,r:{INT:3}},
+  {id:'hygiene',n:'Better Hygiene',xp:700,r:{VIT:10}},
+  {id:'lowscreen',n:'Lower Screen Time',xp:400,r:{VIT:4}},
+  {id:'movebody',n:'Move Body Regularly',xp:750,r:{STR:12,STA:6,VIT:3,AGI:4}},
+];
+
+function xpThreshold(lvl) {
+  if (lvl <= 1) return 0;
+  let total = 0, inc = 100;
+  for (let l = 2; l <= lvl; l++) {
+    total += inc;
+    if (l % 10 === 0) inc = Math.round(inc * 1.1);
+  }
+  return total;
+}
+
+function levelFromTotal(totalXp) {
+  let lvl = 1;
+  while (true) {
+    const nextThreshold = xpThreshold(lvl + 1);
+    if (totalXp >= nextThreshold) { lvl++; }
+    else {
+      const curThreshold = xpThreshold(lvl);
+      return { level: lvl, xpIn: totalXp - curThreshold, xpNeed: nextThreshold - curThreshold };
+    }
+    if (lvl > 999) break;
+  }
+  return { level: lvl, xpIn: 0, xpNeed: 100 };
+}
+
+// HP/MP now scales with RANK not level tiers
+// MP gain per level is fixed by current rank at time of level-up
+// VIT bonus: each 1 VIT above 10 = +2 HP
+// INT bonus: each 1 INT above 10 = +1 MP
+function getRankForMp(mp) {
+  let cur = RANKS[0];
+  for (const r of RANKS) { if (mp >= r.mp) cur = r; }
+  return cur;
+}
+
+function maxHpMp(level, statPts) {
+  let hp = 100, mp = 10;
+  for (let l = 2; l <= level; l++) {
+    const rank = getRankForMp(mp);
+    hp += rank.hpLvl;
+    mp += rank.mpLvl;
+  }
+  // VIT and INT bonuses
+  // VIT above 10: every full +1 VIT = +2 HP | INT above 10: every full +1 INT = +1 MP
+  const vitBonus = Math.round((statPts.VIT || 0) * 2);
+  const intBonus = Math.round((statPts.INT || 0) * 1);
+  return { hp: hp + vitBonus, mp: mp + intBonus };
+}
+
+
+const SAVE_KEY = 'slv11';
+function save(data) { localStorage.setItem(SAVE_KEY, JSON.stringify(data)); }
+function load() {
+  const raw = localStorage.getItem(SAVE_KEY);
+  if (!raw) return null;
+  try { return JSON.parse(raw); } catch { return null; }
+}
+function todayStr() { return new Date().toDateString(); }
+
+let gs = load() || {
+  totalXp: 0,
+  statPts: { STR:0, VIT:0, AGI:0, INT:0, STA:0, APP:0 },
+  completedBucket: {},
+  dailyDone: {},
+  repeatDone: {},
+  dayBonusClaimed: false,
+  dailyDate: todayStr()
+};
+
+function updateUI() {
+  const { level, xpIn, xpNeed } = levelFromTotal(gs.totalXp);
+  const { hp, mp } = maxHpMp(level, gs.statPts);
+  const gain = getRankForMp(mp);
+  const rank = getRankForMp(mp);
+  const pct = Math.min(100, Math.round((xpIn / xpNeed) * 100));
+
+  document.getElementById('lvlNum').textContent = level;
+  document.getElementById('nextGain').textContent = `+${gain.hpLvl}HP +${gain.mpLvl}MP`;
+  document.getElementById('xplbl').textContent = `${xpIn} / ${xpNeed} XP`;
+  document.getElementById('xpbar').style.width = pct + '%';
+  document.getElementById('totxp').textContent = `TOTAL XP: ${gs.totalXp}`;
+  document.getElementById('hpTxt').textContent = `${hp}/${hp}`;
+  document.getElementById('mpTxt').textContent = `${mp}/${mp}`;
+  document.getElementById('hpbl').textContent = `${hp}/${hp}`;
+  document.getElementById('mpbl').textContent = `${mp}/${mp}`;
+  document.getElementById('rankTitle').textContent = rank.n.toUpperCase();
+  document.getElementById('rankLtr').textContent = rank.l;
+
+  const badge = document.getElementById('rankBadge');
+  badge.style.color = rank.c;
+  badge.style.borderColor = rank.c + '99';
+  badge.style.boxShadow = `0 0 24px ${rank.glow}, inset 0 0 16px ${rank.glow}`;
+  badge.style.textShadow = `0 0 14px ${rank.c}`;
+
+  const BASE = 10;
+  for (const k of ['STR','VIT','AGI','INT','STA','APP']) {
+    document.getElementById('s'+k).textContent = (BASE + (gs.statPts[k]||0)).toFixed(1).replace(/\.0$/,'');
+  }
+
+  buildQuests();
+  buildRanks(mp);
+  updateDaily();
+}
+
+function buildQuests() {
+  for (const [tab, quests] of Object.entries(RQ)) {
+    const el = document.getElementById('ql-' + tab);
+    if (!el) continue;
+    el.innerHTML = '';
+    for (const q of quests) {
+      const done = !!gs.repeatDone[q.id];
+      const rw = Object.entries(q.r).map(([k,v])=>`${k} +${v}`).join('  ');
+      const safeName = q.n.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+      el.innerHTML += `<div class="qi${done?' done':''}" onclick="doRepeat('${q.id}',${q.xp},'${safeName}',${JSON.stringify(q.r).replace(/"/g,"'")})"><div class="qcb"><span class="qck">✓</span></div><div class="qinfo"><div class="qname">${q.n}</div><div class="qrew">${rw}</div></div><div class="qxp">+${q.xp} XP</div></div>`;
+    }
+  }
+  const bel = document.getElementById('ql-bucket');
+  if (bel) {
+    bel.innerHTML = '';
+    for (const q of BQ) {
+      const done = !!gs.completedBucket[q.id];
+      const rw = Object.entries(q.r).map(([k,v])=>`${k} +${v}`).join('  ');
+      const safeName = q.n.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+      bel.innerHTML += `<div class="qi${done?' done':''}" onclick="doBucket('${q.id}',${q.xp},'${safeName}',${JSON.stringify(q.r).replace(/"/g,"'")})"><div class="qcb"><span class="qck">✓</span></div><div class="qinfo"><div class="qname">${q.n}</div><div class="qrew">${rw}</div></div><div class="qxp">+${q.xp} XP</div></div>`;
+    }
+  }
+}
+
+function buildRanks(curMp) {
+  const cur = getRankForMp(curMp);
+  const g = document.getElementById('rankGrid');
+  g.innerHTML = '';
+  for (let i = 0; i < RANKS.length; i++) {
+    const r = RANKS[i];
+    const isCur = r.l === cur.l;
+    const isUnlocked = curMp >= r.mp;
+    const nextRank = RANKS[i+1];
+    const layers = r.auraLayers || 1;
+
+    // aura opacity scales with rank
+    const auraBaseOpacity = 0.06 + (i * 0.04); // E=0.06 up to NAT=0.30
+
+    // progress bar for current rank
+    let progPct = 0, progTxt = '';
+    if (isCur && nextRank) {
+      progPct = Math.min(100, Math.round(((curMp - r.mp) / (nextRank.mp - r.mp)) * 100));
+      progTxt = `${curMp - r.mp} / ${nextRank.mp - r.mp} MP`;
+    }
+
+    // build aura rings (more layers = more rings)
+    let rings = '';
+    for (let x = 0; x < layers; x++) rings += `<div class="rc-aura-ring" style="color:${r.c};border-color:${r.c};"></div>`;
+
+    // build flame wisps (only from B rank up)
+    let flames = '';
+    if (layers >= 3) {
+      const numFlames = layers;
+      for (let x = 0; x < numFlames; x++) flames += `<div class="rc-flame" style="background:${r.c};color:${r.c};"></div>`;
+    }
+
+    g.innerHTML += `
+    <div class="rcard${isCur?' current':''}${!isUnlocked?' locked':''}"
+      style="color:${r.c};border-color:${isCur ? r.c+'bb' : r.c+'33'};${isCur ? `box-shadow:0 0 30px ${r.glow},0 0 60px ${r.glow},inset 0 0 30px rgba(0,0,0,0.5);` : ''}"
+    >
+      <div class="rc-shimmer"></div>
+      <div class="rcard-inner">
+
+        <div class="rc-left">
+          <div class="rc-aura-base" style="color:${r.c};opacity:${auraBaseOpacity};"></div>
+          ${rings}
+          ${flames}
+          <div class="rc-letter" style="${isCur ? `text-shadow:0 0 14px ${r.c}, 0 0 28px ${r.c};` : `opacity:0.7;`}">${r.l}</div>
+          <div class="rc-rank-label" style="color:${r.c};">RANK</div>
+        </div>
+
+        <div class="rc-mid">
+          <div class="rc-name" style="color:${r.c};${isCur?`text-shadow:0 0 8px ${r.c}55;`:''}">${r.n.toUpperCase()}</div>
+          <div class="rc-desc">${r.desc}</div>
+          <div class="rc-stats">
+            <span class="rc-stat" style="border-color:${r.c}44;color:${r.c};">+${r.hpLvl} HP/LVL</span>
+            <span class="rc-stat" style="border-color:${r.c}44;color:${r.c};">+${r.mpLvl} MP/LVL</span>
+          </div>
+          ${isCur && nextRank ? `
+          <div style="margin-top:9px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+              <span style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--muted);font-weight:700;letter-spacing:1px;">▶ NEXT RANK</span>
+              <span style="font-family:'Orbitron',sans-serif;font-size:9px;color:${r.c};font-weight:900;">${progPct}%</span>
+            </div>
+            <div style="height:4px;background:rgba(255,255,255,0.05);border-radius:1px;overflow:hidden;border:1px solid ${r.c}22;">
+              <div style="height:100%;width:${progPct}%;background:linear-gradient(90deg,${r.c}88,${r.c});box-shadow:0 0 8px ${r.c};border-radius:1px;transition:width .6s;"></div>
+            </div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--muted);margin-top:3px;letter-spacing:1px;font-weight:700;">${progTxt} TO ${nextRank.l}</div>
+          </div>` : ''}
+          ${isCur && !nextRank ? `
+          <div style="margin-top:8px;font-family:'Orbitron',sans-serif;font-size:9px;font-weight:900;color:${r.c};letter-spacing:3px;
+            text-shadow:0 0 12px ${r.c};animation:letter-pulse 2s ease-in-out infinite;">
+            ◆ PINNACLE REACHED ◆
+          </div>` : ''}
+        </div>
+
+        <div class="rc-right">
+          <div class="rc-mp-label">REQUIRES</div>
+          <div class="rc-mp" style="color:${r.c};${isCur?`text-shadow:0 0 12px ${r.c};`:''}">
+            ${r.mp <= 10 ? '—' : r.mp.toLocaleString()}
+          </div>
+          <div class="rc-mp-label">MP</div>
+          ${isCur ? `<div class="rc-you" style="color:${r.c};border-color:${r.c}88;">YOU</div>` : ''}
+          ${isUnlocked && !isCur ? `<div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--green);letter-spacing:1px;margin-top:4px;font-weight:700;">✓ DONE</div>` : ''}
+        </div>
+
+      </div>
+    </div>`;
+  }
+}
+
+function countTodayQuests() { return Object.keys(gs.dailyDone).length + Object.keys(gs.repeatDone).length; }
+
+function checkDayBonus(oldCount) {
+  const newCount = countTodayQuests();
+  if (oldCount < 14 && newCount >= 14 && !gs.dayBonusClaimed) {
+    setTimeout(()=>showEpicBonus(), 600);
+  }
+}
+
+function updateDaily() {
+  const el = document.getElementById('dq-nofap');
+  if (gs.dailyDone['nofap']) el.classList.add('done'); else el.classList.remove('done');
+  const el2 = document.getElementById('dq-posture');
+  if (el2) { if (gs.dailyDone['posture']) el2.classList.add('done'); else el2.classList.remove('done'); }
+  const count = countTodayQuests();
+  const bonusEl = document.getElementById('questCounter');
+  if (bonusEl) bonusEl.textContent = `QUESTS TODAY: ${count}/14${count>=14?' — BONUS CLAIMED! ✓':' — DO 14 FOR +10 XP BONUS'}`;
+}
+
+function showN(html,btns) { document.getElementById('nbody').innerHTML=html; document.getElementById('nbtns').innerHTML=btns; document.getElementById('notifBg').classList.add('show'); }
+function closeN() { document.getElementById('notifBg').classList.remove('show'); }
+
+function flash(xp,st) {
+  const el = document.createElement('div'); el.className = 'flash';
+  el.innerHTML = `+${xp} XP${st?'<span class="sup">'+st+'</span>':''}`;
+  document.body.appendChild(el); setTimeout(()=>el.remove(),1600);
+}
+
+function apply(xp,r,oldLvl,oldCount) {
+  if (oldCount === undefined) oldCount = countTodayQuests();
+  gs.totalXp += xp;
+  for (const [k,v] of Object.entries(r)) gs.statPts[k] = parseFloat(((gs.statPts[k]||0)+v).toFixed(3));
+  save(gs);
+  const {level} = levelFromTotal(gs.totalXp);
+  if (level > oldLvl) {
+    sfxLevelUp();
+    const {hp,mp} = maxHpMp(level, gs.statPts);
+    setTimeout(()=>showN(`<span class="ngreen">LEVEL UP!</span><br><br>You reached<br><span class="ngreen" style="font-size:26px;font-family:'Orbitron',sans-serif;">LEVEL ${level}</span><br><br>HP: ${hp} &nbsp;|&nbsp; MP: ${mp}<br><br>Keep pushing, hunter.`,`<button class="nbtn yes" onclick="closeN()">ACCEPT</button>`),400);
+  } else {
+    sfxQuestDone();
+  }
+  flash(xp, Object.entries(r).map(([k,v])=>`${k}+${v}`).join(' '));
+  checkDayBonus(oldCount);
+  updateUI();
+}
+
+function doDaily(id,xp,name) {
+  if (gs.dailyDone[id]) return;
+  sfxTap();
+  const {level} = levelFromTotal(gs.totalXp);
+  const oldCount = countTodayQuests();
+  showN(`Quest: <b>${name}</b><br><br>Reward: <span class="ngreen">+${xp} XP</span><br><br>Mark complete?`,`<button class="nbtn yes" onclick="closeN();gs.dailyDone['${id}']=true;save(gs);apply(${xp},{},${level},${oldCount});">YES</button><button class="nbtn no" onclick="closeN()">NO</button>`);
+}
+
+function doRepeat(id,xp,name,r) {
+  if (gs.repeatDone[id]) return;
+  sfxTap();
+  const {level} = levelFromTotal(gs.totalXp);
+  const oldCount = countTodayQuests();
+  const rw = Object.entries(r).map(([k,v])=>`${k} +${v}`).join(', ');
+  showN(`<b>${name}</b><br><br><span class="ngreen">+${xp} XP</span>${rw?`<br><span style="color:#00d4ff;">${rw}</span>`:''}`,`<button class="nbtn yes" onclick="closeN();gs.repeatDone['${id}']=true;save(gs);apply(${xp},${JSON.stringify(r).replace(/"/g,"'")},${level},${oldCount});">YES</button><button class="nbtn no" onclick="closeN()">NO</button>`);
+}
+
+function doBucket(id,xp,name,r) {
+  if (gs.completedBucket[id]) return;
+  sfxTap();
+  const {level} = levelFromTotal(gs.totalXp);
+  const oldCount = countTodayQuests();
+  const rw = Object.entries(r).map(([k,v])=>`${k} +${v}`).join(', ');
+  showN(`<span style="color:var(--gold);font-size:9px;letter-spacing:3px;font-family:'Share Tech Mono',monospace;">BUCKET LIST QUEST</span><br><br><b>${name}</b><br><br><span class="ngreen">+${xp} XP</span><br><span style="color:#00d4ff;">${rw}</span><br><br>Have you truly completed this?`,`<button class="nbtn yes" onclick="closeN();gs.completedBucket['${id}']=true;save(gs);apply(${xp},${JSON.stringify(r).replace(/"/g,"'")},${level},${oldCount});">CLAIM</button><button class="nbtn no" onclick="closeN()">NOT YET</button>`);
+}
+
+function sw(name,el) {
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tc').forEach(t=>t.classList.remove('active'));
+  document.getElementById(`tc-${name}`).classList.add('active'); el.classList.add('active');
+}
+
+function checkReset() {
+  const t = todayStr();
+  if (gs.dailyDate !== t) {
+    gs.dailyDate = t;
+    gs.dailyDone = {};
+    gs.repeatDone = {};
+    gs.dayBonusClaimed = false;
+    save(gs);
+  }
+}
+
+function updateTimer() {
+  checkReset(); // always check on every tick — catches missed midnight if tab was sleeping
+  const now=new Date(), mid=new Date(now); mid.setHours(24,0,0,0);
+  const d=mid-now, h=Math.floor(d/3600000), m=Math.floor((d%3600000)/60000), s=Math.floor((d%60000)/1000);
+  document.getElementById('resetTimer').textContent=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+setInterval(updateTimer,1000); updateTimer();
+
+// ── BACKGROUND CANVAS ──
+const cvs=document.getElementById('bg'),ctx2=cvs.getContext('2d');
+let W,H,particles=[],grid=[];
+function resize(){W=cvs.width=window.innerWidth;H=cvs.height=window.innerHeight;initScene();}
+function initScene(){
+  particles=[];
+  for(let i=0;i<60;i++)particles.push({x:Math.random()*W,y:Math.random()*H,r:.4+Math.random()*1.2,vy:-.1-.2*Math.random(),a:.1+Math.random()*.4,pulse:Math.random()*Math.PI*2});
+  grid=[];
+  const cols=Math.ceil(W/60),rows=Math.ceil(H/60);
+  for(let r=0;r<=rows;r++)for(let c=0;c<=cols;c++){if(Math.random()<.06)grid.push({x:c*60,y:r*60,a:.02+Math.random()*.06});}
+}
+function drawBg(){
+  ctx2.clearRect(0,0,W,H);
+  const g=ctx2.createRadialGradient(W*.5,H*.3,0,W*.5,H*.5,Math.max(W,H));
+  g.addColorStop(0,'#020d1e');g.addColorStop(.5,'#020912');g.addColorStop(1,'#010609');
+  ctx2.fillStyle=g;ctx2.fillRect(0,0,W,H);
+  // Grid dots
+  for(const p of grid){ctx2.beginPath();ctx2.arc(p.x,p.y,1,0,Math.PI*2);ctx2.fillStyle=`rgba(0,100,200,${p.a})`;ctx2.fill();}
+  // Floating particles
+  const t=Date.now()*.001;
+  for(const p of particles){
+    const a=p.a*(0.5+0.5*Math.sin(t+p.pulse));
+    ctx2.beginPath();ctx2.arc(p.x,p.y,p.r,0,Math.PI*2);ctx2.fillStyle=`rgba(0,180,255,${a})`;ctx2.fill();
+    p.y+=p.vy;if(p.y<-5){p.y=H+5;p.x=Math.random()*W;}
+  }
+  // Occasional shimmer line
+  if(Math.random()<.008){
+    const lx=Math.random()*W;
+    ctx2.beginPath();ctx2.moveTo(lx,0);ctx2.lineTo(lx+20,H);
+    ctx2.strokeStyle=`rgba(0,150,255,${.02+Math.random()*.04})`;ctx2.lineWidth=.5;ctx2.stroke();
+  }
+}
+function loop(){drawBg();requestAnimationFrame(loop);}
+window.addEventListener('resize',resize);
+resize();loop();
+
+// ── EXPORT / IMPORT ──
+function exportSave() {
+  const data = JSON.stringify(gs, null, 2);
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(data).then(() => {
+      showN('<span class="ngreen">SAVE COPIED!</span><br><br>Your save data has been copied to clipboard.<br><br>Paste it to Claude when requesting updates.',
+        '<button class="nbtn yes" onclick="closeN()">OK</button>');
+    }).catch(() => showExportFallback(data));
+  } else {
+    showExportFallback(data);
+  }
+}
+
+function showExportFallback(data) {
+  const escaped = data.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  showN('<span class="ngreen">YOUR SAVE DATA</span><br><br><textarea readonly style="width:100%;height:140px;background:rgba(0,5,15,.95);border:1px solid #1a3a6e;border-radius:2px;color:#c8e8ff;font-family:monospace;font-size:10px;padding:8px;resize:none;" onclick="this.select()">' + escaped + '</textarea><br><br><span style="font-size:10px;color:#5a8ab0;">Tap the box and select all to copy.</span>',
+    '<button class="nbtn yes" onclick="closeN()">DONE</button>');
+}
+
+function openImport() {
+  document.getElementById('importText').value = '';
+  document.getElementById('importBg').classList.add('show');
+}
+
+function doImport() {
+  const raw = document.getElementById('importText').value.trim();
+  if (!raw) return;
+  try {
+    const parsed = JSON.parse(raw);
+    if (typeof parsed.totalXp === 'undefined') throw new Error('Invalid');
+    gs = parsed;
+    save(gs);
+    document.getElementById('importBg').classList.remove('show');
+    updateUI();
+    showN('<span class="ngreen">SAVE LOADED!</span><br><br>Your progress has been restored successfully.',
+      '<button class="nbtn yes" onclick="closeN()">OK</button>');
+  } catch(e) {
+    showN('<span style="color:var(--red);">INVALID DATA</span><br><br>That does not look like a valid save. Make sure you copied the full export text.',
+      '<button class="nbtn yes" onclick="closeN()">OK</button>');
+  }
+}
+
+// ══════════════════════════════════════════
+// AUDIO ENGINE — Web Audio API, no files needed
+// ══════════════════════════════════════════
+let _ac = null;
+let _muted = false;
+
+function getAC() {
+  if (!_ac) _ac = new (window.AudioContext || window.webkitAudioContext)();
+  if (_ac.state === 'suspended') _ac.resume();
+  return _ac;
+}
+
+function toggleMute() {
+  _muted = !_muted;
+  const btn = document.getElementById('muteBtn');
+  if (btn) btn.textContent = _muted ? '🔇' : '🔊';
+}
+
+// Core: play a tone with envelope
+function tone(freq, type, start, dur, vol, ac, dest) {
+  const o = ac.createOscillator();
+  const g = ac.createGain();
+  o.type = type;
+  o.frequency.setValueAtTime(freq, start);
+  g.gain.setValueAtTime(0, start);
+  g.gain.linearRampToValueAtTime(vol, start + 0.005);
+  g.gain.exponentialRampToValueAtTime(0.0001, start + dur);
+  o.connect(g); g.connect(dest);
+  o.start(start); o.stop(start + dur + 0.01);
+}
+
+// Glitch noise burst
+function noise(start, dur, vol, ac, dest) {
+  const buf = ac.createBuffer(1, ac.sampleRate * dur, ac.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1);
+  const src = ac.createBufferSource();
+  src.buffer = buf;
+  const filter = ac.createBiquadFilter();
+  filter.type = 'bandpass';
+  filter.frequency.value = 1800;
+  filter.Q.value = 0.8;
+  const g = ac.createGain();
+  g.gain.setValueAtTime(vol, start);
+  g.gain.exponentialRampToValueAtTime(0.0001, start + dur);
+  src.connect(filter); filter.connect(g); g.connect(dest);
+  src.start(start); src.stop(start + dur);
+}
+
+// ── SOUND LIBRARY ──
+
+// 1. Quest tap (confirm dialog opens) — short digital knock
+function sfxTap() {
+  if (_muted) return;
+  const ac = getAC(); const t = ac.currentTime;
+  const master = ac.createGain(); master.gain.value = 0.4;
+  master.connect(ac.destination);
+  tone(180, 'sine', t, 0.06, 0.6, ac, master);
+  tone(360, 'square', t + 0.01, 0.04, 0.15, ac, master);
+}
+
+// 2. Quest complete — ascending 2-note system chime
+function sfxQuestDone() {
+  if (_muted) return;
+  const ac = getAC(); const t = ac.currentTime;
+  const master = ac.createGain(); master.gain.value = 0.45;
+  master.connect(ac.destination);
+  tone(520, 'sine', t, 0.18, 0.7, ac, master);
+  tone(780, 'sine', t + 0.14, 0.28, 0.9, ac, master);
+  noise(t + 0.13, 0.08, 0.07, ac, master);
+}
+
+// 3. XP gain shimmer — high glitch sweep
+function sfxXP() {
+  if (_muted) return;
+  const ac = getAC(); const t = ac.currentTime;
+  const master = ac.createGain(); master.gain.value = 0.3;
+  master.connect(ac.destination);
+  const o = ac.createOscillator();
+  const g = ac.createGain();
+  o.type = 'sine';
+  o.frequency.setValueAtTime(1200, t);
+  o.frequency.exponentialRampToValueAtTime(300, t + 0.22);
+  g.gain.setValueAtTime(0.6, t);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.22);
+  o.connect(g); g.connect(master);
+  o.start(t); o.stop(t + 0.25);
+  noise(t, 0.06, 0.12, ac, master);
+}
+
+// 4. Tab switch — soft system click
+function sfxTab() {
+  if (_muted) return;
+  const ac = getAC(); const t = ac.currentTime;
+  const master = ac.createGain(); master.gain.value = 0.25;
+  master.connect(ac.destination);
+  tone(220, 'square', t, 0.04, 0.5, ac, master);
+  tone(440, 'sine', t + 0.02, 0.06, 0.3, ac, master);
+}
+
+// 5. Notification open — Solo Leveling system ping: low resonant knock + glitch
+function sfxNotif() {
+  if (_muted) return;
+  const ac = getAC(); const t = ac.currentTime;
+  const master = ac.createGain(); master.gain.value = 0.5;
+  master.connect(ac.destination);
+  // deep thud
+  const o = ac.createOscillator();
+  const g = ac.createGain();
+  o.type = 'sine';
+  o.frequency.setValueAtTime(90, t);
+  o.frequency.exponentialRampToValueAtTime(40, t + 0.18);
+  g.gain.setValueAtTime(0.9, t);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.22);
+  o.connect(g); g.connect(master);
+  o.start(t); o.stop(t + 0.25);
+  // digital overlay
+  tone(1400, 'square', t + 0.02, 0.05, 0.12, ac, master);
+  tone(700, 'sawtooth', t + 0.05, 0.06, 0.1, ac, master);
+  noise(t, 0.04, 0.2, ac, master);
+}
+
+// 6. Level up — dramatic ascending chord, like a gate awakening
+function sfxLevelUp() {
+  if (_muted) return;
+  const ac = getAC(); const t = ac.currentTime;
+  const master = ac.createGain(); master.gain.value = 0.55;
+  // reverb via delay feedback
+  const delay = ac.createDelay(0.5);
+  const feedback = ac.createGain(); feedback.gain.value = 0.35;
+  const wetGain = ac.createGain(); wetGain.gain.value = 0.4;
+  delay.delayTime.value = 0.18;
+  delay.connect(feedback); feedback.connect(delay);
+  delay.connect(wetGain); wetGain.connect(ac.destination);
+  master.connect(ac.destination); master.connect(delay);
+  // low boom
+  const o1 = ac.createOscillator(); const g1 = ac.createGain();
+  o1.type = 'sine'; o1.frequency.setValueAtTime(80, t);
+  g1.gain.setValueAtTime(0.9, t); g1.gain.exponentialRampToValueAtTime(0.001, t + 0.5);
+  o1.connect(g1); g1.connect(master); o1.start(t); o1.stop(t + 0.55);
+  // chord tones ascending
+  const notes = [260, 330, 392, 520, 660];
+  notes.forEach((f, i) => {
+    tone(f, 'sine', t + i * 0.08, 0.5 - i * 0.05, 0.5 - i * 0.05, ac, master);
+  });
+  // glitch spray
+  noise(t + 0.05, 0.12, 0.15, ac, master);
+  noise(t + 0.3, 0.08, 0.1, ac, master);
+  // high shimmer tail
+  tone(1046, 'sine', t + 0.35, 0.4, 0.25, ac, master);
+}
+
+// 7. Epic daily bonus — deep gate BOOM + rising digital hum (like a dungeon gate opening)
+function sfxEpicOpen() {
+  if (_muted) return;
+  const ac = getAC(); const t = ac.currentTime;
+  const master = ac.createGain(); master.gain.value = 0.6;
+  const delay = ac.createDelay(0.6);
+  const fb = ac.createGain(); fb.gain.value = 0.3;
+  const wet = ac.createGain(); wet.gain.value = 0.45;
+  delay.connect(fb); fb.connect(delay); delay.connect(wet); wet.connect(ac.destination);
+  master.connect(ac.destination); master.connect(delay);
+  // massive sub boom
+  const boom = ac.createOscillator(); const bg = ac.createGain();
+  boom.type = 'sine'; boom.frequency.setValueAtTime(55, t);
+  boom.frequency.exponentialRampToValueAtTime(30, t + 0.6);
+  bg.gain.setValueAtTime(1.0, t); bg.gain.exponentialRampToValueAtTime(0.001, t + 0.7);
+  boom.connect(bg); bg.connect(master); boom.start(t); boom.stop(t + 0.75);
+  // rising hum — like a portal
+  const hum = ac.createOscillator(); const hg = ac.createGain();
+  hum.type = 'sawtooth'; hum.frequency.setValueAtTime(80, t + 0.1);
+  hum.frequency.linearRampToValueAtTime(320, t + 1.2);
+  hg.gain.setValueAtTime(0, t + 0.1);
+  hg.gain.linearRampToValueAtTime(0.35, t + 0.4);
+  hg.gain.exponentialRampToValueAtTime(0.001, t + 1.3);
+  hum.connect(hg); hg.connect(master); hum.start(t + 0.1); hum.stop(t + 1.35);
+  // glitch bursts
+  noise(t, 0.06, 0.5, ac, master);
+  noise(t + 0.08, 0.04, 0.3, ac, master);
+  noise(t + 0.5, 0.1, 0.2, ac, master);
+  // ascending chime
+  [440, 554, 659, 880].forEach((f, i) => {
+    tone(f, 'sine', t + 0.5 + i * 0.12, 0.4, 0.3 - i * 0.04, ac, master);
+  });
+}
+
+// 8. Claim reward — epic multi-tone victory jingle
+function sfxClaim() {
+  if (_muted) return;
+  const ac = getAC(); const t = ac.currentTime;
+  const master = ac.createGain(); master.gain.value = 0.55;
+  const delay = ac.createDelay(0.5);
+  const fb = ac.createGain(); fb.gain.value = 0.28;
+  const wet = ac.createGain(); wet.gain.value = 0.4;
+  delay.connect(fb); fb.connect(delay); delay.connect(wet); wet.connect(ac.destination);
+  master.connect(ac.destination); master.connect(delay);
+  // victory fanfare
+  const fanfare = [392, 523, 659, 784, 1046];
+  fanfare.forEach((f, i) => {
+    tone(f, 'sine', t + i * 0.1, 0.6 - i * 0.05, 0.7 - i * 0.08, ac, master);
+    if (i < 3) tone(f * 0.5, 'sine', t + i * 0.1, 0.4, 0.25, ac, master);
+  });
+  // final high shimmer
+  tone(1568, 'sine', t + 0.55, 0.8, 0.4, ac, master);
+  noise(t, 0.08, 0.3, ac, master);
+  noise(t + 0.5, 0.12, 0.2, ac, master);
+}
+
+// ── WIRE SOUNDS INTO FUNCTIONS ──
+
+// Patch showN to play notif sound
+const _origShowN = showN;
+window.showN = function(html, btns) { sfxNotif(); _origShowN(html, btns); };
+
+// Patch sw (tab switch)
+const _origSw = sw;
+window.sw = function(name, el) { sfxTab(); _origSw(name, el); };
+
+// ── BACKGROUND MUSIC ──
+(function() {
+  let music = null;
+  let started = false;
+
+  function initMusic() {
+    if (started) return;
+    started = true;
+    music = new Audio('YTDown_YouTube_Solo-Leveling-EP-6-OST-FULL-DARK-ARIA-LV_Media_WczSfh3gJaU_009_128k.mp3');
+    music.loop = true;
+    music.volume = 0.05;
+    music.play().catch(()=>{});
+  }
+
+  // Try autoplay on load (works in PWA mode)
+  window.addEventListener('load', function() {
+    setTimeout(initMusic, 300);
+    // fallback on first tap
+    document.addEventListener('click', initMusic, {once: true});
+    document.addEventListener('touchend', initMusic, {once: true});
+
+    const _origToggleMute = window.toggleMute;
+    window.toggleMute = function() {
+      _origToggleMute();
+      if (music) music.muted = _muted;
+      document.getElementById('muteBtn').textContent = _muted ? '🔇' : '🔊';
+    };
+  });
+})();
+
+// ── EPIC DAILY BONUS ──
+let confettiAnim = null;
+
+function showEpicBonus() {
+  sfxEpicOpen();
+  const overlay = document.getElementById('epicOverlay');
+  overlay.style.display = 'flex';
+  startConfetti();
+}
+
+function epicClaim() {
+  sfxClaim();
+  gs.totalXp += 10;
+  gs.dayBonusClaimed = true;
+  save(gs);
+  stopConfetti();
+  const overlay = document.getElementById('epicOverlay');
+  // slam-close animation
+  overlay.style.transition = 'opacity 0.5s ease';
+  overlay.style.opacity = '0';
+  setTimeout(() => {
+    overlay.style.display = 'none';
+    overlay.style.opacity = '1';
+    overlay.style.transition = '';
+    flash(10, '✦ BONUS CLAIMED ✦');
+    updateUI();
+  }, 500);
+}
+
+function startConfetti() {
+  const canvas = document.getElementById('confettiCanvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const COLORS = ['#00d4ff','#f0c040','#00ff88','#ff3355','#4488ff','#00a8cc','#b8d8f0'];
+  const SHAPES = ['rect','circle','triangle'];
+  const pieces = [];
+
+  for (let i = 0; i < 60; i++) {
+    pieces.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height - canvas.height,
+      w: 4 + Math.random() * 10,
+      h: 4 + Math.random() * 6,
+      color: COLORS[Math.floor(Math.random() * COLORS.length)],
+      shape: SHAPES[Math.floor(Math.random() * SHAPES.length)],
+      rot: Math.random() * Math.PI * 2,
+      rotV: (Math.random() - 0.5) * 0.2,
+      vy: 1.5 + Math.random() * 3.5,
+      vx: (Math.random() - 0.5) * 2,
+      alpha: 0.8 + Math.random() * 0.2,
+      wobble: Math.random() * Math.PI * 2,
+      wobbleSpeed: 0.05 + Math.random() * 0.08,
+    });
+  }
+
+  function drawPiece(p) {
+    ctx.save();
+    ctx.globalAlpha = p.alpha;
+    ctx.fillStyle = p.color;
+    ctx.shadowColor = p.color;
+    ctx.shadowBlur = 6;
+    ctx.translate(p.x, p.y);
+    ctx.rotate(p.rot);
+    if (p.shape === 'rect') {
+      ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+    } else if (p.shape === 'circle') {
+      ctx.beginPath(); ctx.arc(0, 0, p.w/2, 0, Math.PI*2); ctx.fill();
+    } else {
+      ctx.beginPath(); ctx.moveTo(0,-p.h); ctx.lineTo(p.w/2,p.h/2); ctx.lineTo(-p.w/2,p.h/2); ctx.closePath(); ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  function tick() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (const p of pieces) {
+      p.wobble += p.wobbleSpeed;
+      p.x += p.vx + Math.sin(p.wobble) * 0.8;
+      p.y += p.vy;
+      p.rot += p.rotV;
+      if (p.y > canvas.height + 20) {
+        p.y = -20;
+        p.x = Math.random() * canvas.width;
+      }
+      drawPiece(p);
+    }
+    confettiAnim = requestAnimationFrame(tick);
+  }
+  tick();
+}
+
+function stopConfetti() {
+  if (confettiAnim) { cancelAnimationFrame(confettiAnim); confettiAnim = null; }
+  const canvas = document.getElementById('confettiCanvas');
+  if (canvas) canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+}
+
+checkReset();updateUI();
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>
